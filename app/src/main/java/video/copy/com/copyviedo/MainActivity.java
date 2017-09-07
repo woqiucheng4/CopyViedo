@@ -48,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
                 if (!videoList.isEmpty()) {
                     for (int i = 0; i < videoList.size(); i++) {
                         copyFile(videoList.get(i).getFilePath(), path+i+".iso");
+                        if(i==videoList.size()-1){
+                            Toast.makeText(MainActivity.this,"over",Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             }
@@ -113,6 +116,5 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
 
         }
-
     }
 }
