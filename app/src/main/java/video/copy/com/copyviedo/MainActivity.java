@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,9 +28,10 @@ public class MainActivity extends AppCompatActivity {
     private Button playButton;
 
     private String path = Environment.getExternalStorageDirectory().getAbsolutePath() //
-            + File.separator;
+            + File.separator + "aaa" + File.separator;
 
     private List<VideoInfo> videoList = new ArrayList<>();
+    private List<VideoInfo> isoList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,31 +39,34 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, CODE_FOR_WRITE_PERMISSION);
-        } else {
-            getViedo();
         }
         copyButton = (Button) findViewById(R.id.copy);
         playButton = (Button) findViewById(R.id.play);
         copyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                getViedo();
                 if (!videoList.isEmpty()) {
+                    Toast.makeText(MainActivity.this, "num is "+videoList.size(), Toast.LENGTH_SHORT).show();
                     for (int i = 0; i < videoList.size(); i++) {
-                        copyFile(videoList.get(i).getFilePath(), path+i+".iso");
-                        if(i==videoList.size()-1){
-                            Toast.makeText(MainActivity.this,"over",Toast.LENGTH_SHORT).show();
-                        }
+                        copySdcardFile(i + 1, videoList.get(i).getFilePath(), path + videoList.get(i).getDisplayName() + ".iso");
                     }
+                } else {
+                    Toast.makeText(MainActivity.this, "null", Toast.LENGTH_SHORT).show();
                 }
             }
         });
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!videoList.isEmpty()) {
-                    for (int i = 0; i < videoList.size(); i++) {
-                        copyFile( path+i+".iso", path+ i+".mp4");
+                getISO();
+                if (!isoList.isEmpty()) {
+                    Toast.makeText(MainActivity.this, "num is "+isoList.size(), Toast.LENGTH_SHORT).show();
+                    for (int i = 0; i < isoList.size(); i++) {
+                        copySdcardFile(i + 1, isoList.get(i).getFilePath(), path + isoList.get(i).getDisplayName() + ".mp4");
                     }
+                } else {
+                    Toast.makeText(MainActivity.this, "null", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -69,6 +74,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void getViedo() {
         VideoUtils.getVideoFile(videoList, new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "DCIM"));
+    }
+
+    private void getISO() {
+        VideoUtils.getISOFile(isoList, new File(path));
     }
 
 
@@ -87,34 +96,30 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    /**
-     * 复制单个文件
-     *
-     * @param oldPath String 原文件路径 如：c:/fqf.txt
-     * @param newPath String 复制后路径 如：f:/fqf.txt
-     * @return boolean
-     */
-    public void copyFile(String oldPath, String newPath) {
-        try {
-            int bytesum = 0;
-            int byteread = 0;
-            File oldfile = new File(oldPath);
-            if (oldfile.exists()) { //文件存在时
-                InputStream inStream = new FileInputStream(oldPath); //读入原文件
-                FileOutputStream fs = new FileOutputStream(newPath);
-                byte[] buffer = new byte[1000000];
-                int length;
-                while ((byteread = inStream.read(buffer)) != -1) {
-                    bytesum += byteread; //字节数 文件大小
-                    Log.i("nnn", "bytesum==" + bytesum);
-                    fs.write(buffer, 0, byteread);
+    public void copySdcardFile(final int position, final String fromFile, final String toFile) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    InputStream fosfrom = new FileInputStream(fromFile);
+                    OutputStream fosto = new FileOutputStream(toFile);
+                    byte bt[] = new byte[1024];
+                    int c;
+                    while ((c = fosfrom.read(bt)) > 0) {
+                        fosto.write(bt, 0, c);
+                    }
+                    fosfrom.close();
+                    fosto.close();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, position + " is over", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } catch (Exception ex) {
+                    Log.i("nnn", "ex==" + ex.getMessage().toString());
                 }
-                inStream.close();
             }
-        } catch (Exception e) {
-            Log.i("nnn", "复制单个文件操作出错");
-            e.printStackTrace();
-
-        }
+        }).start();
     }
 }

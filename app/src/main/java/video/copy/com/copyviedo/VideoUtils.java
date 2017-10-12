@@ -87,7 +87,12 @@ public class VideoUtils {
                             || name.equalsIgnoreCase(".ndivx") //
                             || name.equalsIgnoreCase(".xvid")) {
                         VideoInfo vi = new VideoInfo();
-                        vi.setDisplayName(file.getName());//文件名
+                        if (file.getName().contains(".")) {
+                            String[] strs = file.getName().split("\\.");
+                            vi.setDisplayName(strs[0]);//文件名
+                        } else {
+                            vi.setDisplayName(file.getName());//文件名
+                        }
                         vi.setFilePath(file.getAbsolutePath());//文件路径
                         list.add(vi);
                         Log.i("nnn", "文件名:" + vi.getDisplayName() + ",路径:" + vi.getFilePath());
@@ -95,6 +100,43 @@ public class VideoUtils {
                     }
                 } else if (file.isDirectory()) {
                     getVideoFile(list, file);
+                }
+                return false;
+            }
+        });
+    }
+
+    /**
+     * 获取指定路径中的iso文件
+     *
+     * @param isolist 装扫描出来的iso文件实体类
+     * @param file    指定的文件
+     */
+    public static void getISOFile(final List<VideoInfo> isolist, File file) {// 获得iso文件
+        //获取该目录下的所有文件
+        file.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                // sdCard找到视频名称
+                String name = file.getName();
+                int i = name.lastIndexOf('.');
+                if (i != -1) {
+                    name = name.substring(i);//获取文件后缀名
+                    if (name.equalsIgnoreCase(".iso")) {
+                        VideoInfo vi = new VideoInfo();
+                        if (file.getName().contains(".")) {
+                            String[] strs = file.getName().split("\\.");
+                            vi.setDisplayName(strs[0]);//文件名
+                        } else {
+                            vi.setDisplayName(file.getName());//文件名
+                        }
+                        vi.setFilePath(file.getAbsolutePath());//文件路径
+                        isolist.add(vi);
+                        Log.i("nnn", "iso文件名:" + vi.getDisplayName() + ",iso路径:" + vi.getFilePath());
+                        return true;
+                    }
+                } else if (file.isDirectory()) {
+                    getISOFile(isolist, file);
                 }
                 return false;
             }
