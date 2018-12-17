@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!videoList.isEmpty()) {
                     Toast.makeText(MainActivity.this, "num is "+videoList.size(), Toast.LENGTH_SHORT).show();
                     for (int i = 0; i < videoList.size(); i++) {
-                        copySdcardFile(i + 1, videoList.get(i).getFilePath(), path + videoList.get(i).getDisplayName() + ".iso");
+                        copySdcardFile(i + 1, videoList.get(i).getFilePath(), makeFilePath(path,videoList.get(i).getDisplayName() + ".iso"));
                     }
                 } else {
                     Toast.makeText(MainActivity.this, "null", Toast.LENGTH_SHORT).show();
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!isoList.isEmpty()) {
                     Toast.makeText(MainActivity.this, "num is "+isoList.size(), Toast.LENGTH_SHORT).show();
                     for (int i = 0; i < isoList.size(); i++) {
-                        copySdcardFile(i + 1, isoList.get(i).getFilePath(), path + isoList.get(i).getDisplayName() + ".mp4");
+                        copySdcardFile(i + 1, isoList.get(i).getFilePath(), makeFilePath(path,isoList.get(i).getDisplayName() + ".mp4"));
                     }
                 } else {
                     Toast.makeText(MainActivity.this, "null", Toast.LENGTH_SHORT).show();
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    public void copySdcardFile(final int position, final String fromFile, final String toFile) {
+    public void copySdcardFile(final int position, final String fromFile, final File toFile) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -121,5 +121,33 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
+    }
+
+    // 生成文件
+    public File makeFilePath(String filePath, String fileName) {
+        File file = null;
+        makeRootDirectory(filePath);
+        try {
+            file = new File(filePath + fileName);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+
+    // 生成文件夹
+    public static void makeRootDirectory(String filePath) {
+        File file = null;
+        try {
+            file = new File(filePath);
+            if (!file.exists()) {
+                file.mkdir();
+            }
+        } catch (Exception e) {
+            Log.i("error:", e+"");
+        }
     }
 }
