@@ -15,6 +15,8 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,6 +46,12 @@ public class VideoUtils {
         return bitmap;
     }
 
+    private static String getDateTime(){
+        Date d = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String str = sdf.format(d);
+        return  str;
+    }
     /**
      * 获取指定路径中的视频文件
      *
@@ -51,14 +59,15 @@ public class VideoUtils {
      * @param file 指定的文件
      */
     public static void getVideoFile(final List<VideoInfo> list, File file) {// 获得视频文件
+        final String time = getDateTime();
+        Log.i("nnn", "getDateTime90=="+time);
         //获取该目录下的所有文件
         file.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
-                // sdCard找到视频名称
                 String name = file.getName();
                 int i = name.lastIndexOf('.');
-                if (i != -1) {
+                if (i != -1 && name.contains(time)) {
                     name = name.substring(i);//获取文件后缀名
                     if (name.equalsIgnoreCase(".mp4")  //忽略大小写
                             || name.equalsIgnoreCase(".3gp") //
